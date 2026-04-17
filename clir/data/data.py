@@ -245,10 +245,15 @@ class ContrastiveDataset(FairseqDataset):
         x = self.src_dataset[idx]
         if len(x) > self.max_length:
             x = x[:self.max_length]
+        # if self.remove_offset:
+        #     x[1:] -= 4
+        # else:
+        #     x[x >= self.max_id] = 3
         if self.remove_offset:
             x[1:] -= 4
         else:
-            x[x >= self.max_id] = 3
+            if self.max_id is not None:    # Thêm điều kiện kiểm tra an toàn
+                x[x >= self.max_id] = 3
         x[-1] = self.eos
         ys = list()
         levs_at_ids = list()

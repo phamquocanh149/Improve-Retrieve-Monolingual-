@@ -148,9 +148,28 @@ class BiEncoder(pl.LightningModule):
         ----------
         input: dict
         """
+        # --- THÊM ĐOẠN NÀY ĐỂ ĐỒNG BỘ 4 ID ĐẶC BIỆT ---
+        if "labse" in self.model_name_or_path.lower():
+            for key in ["src", "tgt"]:
+                # Map <s> (0) -> [CLS] (101)
+                input[key]["input_ids"][input[key]["input_ids"] == 0] = 101
+                # Map </s> (2) -> [SEP] (102)
+                input[key]["input_ids"][input[key]["input_ids"] == 2] = 102
+                # Map <pad> (1) -> [PAD] (0)
+                input[key]["input_ids"][input[key]["input_ids"] == 1] = 0
+                # Map <unk> (3) -> [UNK] (100) của LaBSE
+                input[key]["input_ids"][input[key]["input_ids"] == 3] = 100
+                
+                # Cập nhật lại attention_mask vì ID pad của LaBSE giờ là 0
+                input[key]["attention_mask"] = input[key]["input_ids"].ne(0)
+        # ---------------------------------------------
+        
+
         # embed questions and contexts
         src_out = self.src_model(**input["src"])
-        if self.model_name_or_path not in ["labse"]:
+        # if self.model_name_or_path not in ["labse"]:
+        #     src_out = src_out.last_hidden_state[:, 0, :]
+        if "labse" not in self.model_name_or_path.lower():
             src_out = src_out.last_hidden_state[:, 0, :]
         self.max_tokens = max(self.max_tokens, input["src"]["input_ids"].shape[0] * input["src"]["input_ids"].shape[1])
         if self.second_stage and (
