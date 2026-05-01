@@ -56,3 +56,4 @@ python -m clir.index.index --config experiments/configs/{config}.yaml
 python -m clir.retrieve.retrieve --config experiments/configs/{config}.yaml
 ```
 
+## Để cải tiến với bài toán dịch Việt - Khmer kết hợp retrieve để chạy offline trên Kaggle RTX thì đây là code đã được chỉnh sửa phù hợp, tuy nhiên có vẻ chưa được thực sự hiệu quả
