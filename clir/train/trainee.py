@@ -1,3 +1,4 @@
+
 """
 Trainee is a pl.LightningModule that computes the loss so it is compatible with Trainer.
 """
@@ -68,6 +69,12 @@ class BiEncoder(pl.LightningModule):
         # default to symmetric encoders
         # init encoders
         self.pad_token_id = pad_token_id
+        
+        # =====================================================================
+        # HACK TỐI THƯỢNG CHO RTX 6000: BỎ QUA CLI VÀ ÉP NẠP OFFLINE TỪ Ổ CỨNG
+        # =====================================================================
+        model_name_or_path = '/kaggle/input/datasets/pqanhhl149/sentence-transformerslabse/LaBSE'
+        
         self.model_name_or_path = model_name_or_path
         self.src_model, config = get_pretrained(
             pretrained_model_name_or_path=model_name_or_path,
@@ -169,13 +176,15 @@ class BiEncoder(pl.LightningModule):
         src_out = self.src_model(**input["src"])
         # if self.model_name_or_path not in ["labse"]:
         #     src_out = src_out.last_hidden_state[:, 0, :]
-        if "labse" not in self.model_name_or_path.lower():
+        # if "labse" not in self.model_name_or_path.lower():
+        #     src_out = src_out.last_hidden_state[:, 0, :]
+        # SỬA LỖI Ở ĐÂY: Luôn trích xuất Tensor từ Hugging Face Object
+        if hasattr(src_out, 'last_hidden_state'):
             src_out = src_out.last_hidden_state[:, 0, :]
         self.max_tokens = max(self.max_tokens, input["src"]["input_ids"].shape[0] * input["src"]["input_ids"].shape[1])
         if self.second_stage and (
             self.divide_in_k or (
-                input["tgt"]["input_ids"].shape[0] * 
-                input["tgt"]["input_ids"].shape[1] > 
+                input["tgt"]["input_ids"].shape[0] * input["tgt"]["input_ids"].shape[1] > 
                 self.max_tokens * 0.9
             )
         ):

@@ -27,6 +27,18 @@ subcommands:
 import pytorch_lightning as pl
 from pytorch_lightning.cli import LightningCLI
 
+# ==========================================================
+# BẢN VÁ LỖI FAIRSEQ VERSION MISMATCH (CHỐNG VÒNG LẶP ĐỆ QUY)
+# Gán cứng ID của các token đặc biệt theo chuẩn của Fairseq
+# ==========================================================
+import fairseq
+from fairseq.data import Dictionary
+if not hasattr(Dictionary, 'bos_index'):
+    Dictionary.bos_index = property(lambda self: 0)
+    Dictionary.pad_index = property(lambda self: 1)
+    Dictionary.eos_index = property(lambda self: 2)
+    Dictionary.unk_index = property(lambda self: 3)
+# ==========================================================
 
 def main():
     cli = LightningCLI(

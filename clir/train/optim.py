@@ -128,7 +128,7 @@ class MSELevenshteinLoss_old(nn.Module):
         return self.mse(self.get_pseudo_lev(similarities).view(-1), levs.view(-1))
 
 class MSELevenshteinLoss(nn.Module):
-    def __init__(self, alpha=8.0, beta=-7.0, loss_type="mse"):
+    def __init__(self, alpha=4.0, beta=-3.0, loss_type="mse"):
         super(MSELevenshteinLoss, self).__init__()
         self.alpha = nn.parameter.Parameter(torch.tensor(alpha, dtype=torch.float32))
         self.beta = nn.parameter.Parameter(torch.tensor(beta, dtype=torch.float32))

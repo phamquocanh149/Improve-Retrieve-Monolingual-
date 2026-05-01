@@ -10,9 +10,9 @@ trainer:
   callbacks:
   - class_path: pytorch_lightning.callbacks.early_stopping.EarlyStopping
     init_args:
-      monitor: InBatchNDCG
+      monitor: eval/loss
       patience: 5
-      mode: max
+      mode: min
   - class_path: pytorch_lightning.callbacks.ModelCheckpoint
     init_args:
       save_top_k: 1
@@ -22,7 +22,7 @@ trainer:
     init_args:
       logging_interval: step
   fast_dev_run: false
-  max_epochs: 10
+  max_epochs: 7
   min_epochs: 1
   max_steps: -1
   min_steps: null
@@ -32,7 +32,7 @@ trainer:
   limit_test_batches: null
   limit_predict_batches: null
   overfit_batches: 0.0
-  val_check_interval: 5000
+  val_check_interval: null
   check_val_every_n_epoch: 1
   num_sanity_val_steps: null
   log_every_n_steps: 100
@@ -52,52 +52,52 @@ trainer:
   plugins: null
   sync_batchnorm: false
   reload_dataloaders_every_n_epochs: 1
-  default_root_dir: experiments/logs/train-clir
+  default_root_dir: /kaggle/working/Improve-Retrieve-Monolingual--qap_fix_khmer/experiments/logs/train-clir
 ckpt_path: null
 model:
   class_path: clir.train.trainee.BiEncoder
   init_args:
-    model_name_or_path: experiments/models/ls-0.1-norm-temp+-bow-0.1-init+.pt
-    vocab_size: 34852
-    pad_token_id: 1
-    type_vocab_size: 1
+    model_name_or_path: "sentence-transformers/LaBSE"
+    vocab_size: 501153
+    pad_token_id: 0
+    type_vocab_size: 2
     freeze_regex: null
     gradient_checkpointing: false
     warmup_steps: 2000
     lr_scheduler: isqrt
     sqrt_lr_update_factor: null
-    lr: 1.0e-04
+    lr: 2.0e-5
     betas:
     - 0.9
     - 0.999
-    eps: 1.0e-08
+    eps: 1.0e-8
     weight_decay: 0.0
     label_smoothing: 0.1
     label_smoothing_bow: 0.1
     normalize: true
-    temp_lr: 1.0e-2
-    bow_lr: 1.0e-2
+    temp_lr: 2.0e-3
+    bow_lr: 2.0e-3
     bow_multiplicator: null
     bow_loss: false
     bow_loss_factor: null
     lev_train: true
-    lev_loss_type: rank
+    lev_loss_type: "mae"
     divide_in_k: false
 data:
   class_path: clir.train.data.DataModuleMMap
   init_args:
-    dict_path: experiments/data/multidomain/data-bin/dict.en.txt
-    dataset_path: experiments/data/multidomain/data-bin
-    src_lang: en
-    tgt_lang: fr
+    dict_path: /kaggle/working/Improve-Retrieve-Monolingual--qap_fix_khmer/data-bin/dict.txt
+    dataset_path: /kaggle/working/Improve-Retrieve-Monolingual--qap_fix_khmer/data-bin
+    src_lang: vi
+    tgt_lang: km
     train: true
     valid: true
     test: false
-    max_positions: 220
-    max_tokens: 5500
+    max_positions: 128
+    max_tokens: 8000
     max_sentences: 128
-    retrieval_path: experiments/data/multidomain/retrieval/ls-0.1-norm-temp+-bow-0.1-init+/indices-cat-train-full-k=5.npy
-    lev_path: experiments/data/multidomain/retrieval/ls-0.1-norm-temp+-bow-0.1-init+/lev-cat-train-full-k=5.npy
-    retrieval_path_valid: experiments/data/multidomain/retrieval/ls-0.1-norm-temp+-bow-0.1-init+/indices-cat-valid-full-k=5.npy
-    lev_path_valid: experiments/data/multidomain/retrieval/ls-0.1-norm-temp+-bow-0.1-init+/lev-cat-valid-full-k=5.npy
-    max_lev: 3
+    retrieval_path: /kaggle/working/Improve-Retrieve-Monolingual--qap_fix_khmer/retrieval/indices-cat-train-full-k=5.npy
+    lev_path: /kaggle/working/Improve-Retrieve-Monolingual--qap_fix_khmer/retrieval/lev-cat-train-full-k=5.npy
+    retrieval_path_valid: /kaggle/working/Improve-Retrieve-Monolingual--qap_fix_khmer/retrieval/indices-cat-valid-full-k=5.npy
+    lev_path_valid: /kaggle/working/Improve-Retrieve-Monolingual--qap_fix_khmer/retrieval/lev-cat-valid-full-k=5.npy
+    max_lev: 5

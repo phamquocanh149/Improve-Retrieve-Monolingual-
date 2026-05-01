@@ -9,19 +9,14 @@ import re
 import string
 
 import transformers
-# from clir.models import BertWithCustomEmbedding
 import torch
 from transformers import BertModel, XLMModel, XLMRobertaModel
 from ..models import LABSEModule
 
 ClassModel = BertModel
 
-
 def get_pretrained(pretrained_model_name_or_path, **kwargs):
     if pretrained_model_name_or_path is None:
-        # print("kwargs", kwargs)
-        # print(ClassModel.config_class())
-        # print(ClassModel.config_class(**kwargs))
         config = ClassModel.config_class(**kwargs)
         model = ClassModel(config)
         print(f"Randomly initialized model:\n{model}")
@@ -29,9 +24,18 @@ def get_pretrained(pretrained_model_name_or_path, **kwargs):
         model = LABSEModule()
         config = None
     else:
-        model = torch.load(pretrained_model_name_or_path)
-        # model = transformers.from_pretrained(pretrained_model_name_or_path, **kwargs)
-        config = None
+        # --- BẢN VÁ LỖI: PHÂN BIỆT FILE VÀ THƯ MỤC ---
+        if os.path.isfile(pretrained_model_name_or_path):
+            # Nếu là file .pt (Cách cũ của tác giả)
+            model = torch.load(pretrained_model_name_or_path)
+            config = None
+        else:
+            # Nếu là Thư mục chứa mô hình Offline (Chuẩn Hugging Face)
+            print(f"Đang nạp mô hình HuggingFace từ thư mục nội bộ: {pretrained_model_name_or_path}")
+            model = ClassModel.from_pretrained(pretrained_model_name_or_path, **kwargs)
+            config = model.config
+        # ---------------------------------------------
+        
     return model, config
 
 
@@ -49,4 +53,4 @@ def load_pretrained_in_kwargs(kwargs):
 
 
 if __name__ == '__main__':
-    ...
+    pass
