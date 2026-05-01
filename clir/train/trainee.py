@@ -137,17 +137,17 @@ class BiEncoder(pl.LightningModule):
         
         self.post_init()
 
-    def make_input_from_fairseq(self, input):
-        return dict(
-            src=dict(
-                input_ids=input["net_input"]["src_tokens"],
-                attention_mask=input["net_input"]["src_tokens"].ne(self.pad_token_id)
-            ),
-            tgt=dict(
-                input_ids=input["target"],
-                attention_mask=input["target"].ne(self.pad_token_id)
-            )
-        )
+    # def make_input_from_fairseq(self, input):
+    #     return dict(
+    #         src=dict(
+    #             input_ids=input["net_input"]["src_tokens"],
+    #             attention_mask=input["net_input"]["src_tokens"].ne(self.pad_token_id)
+    #         ),
+    #         tgt=dict(
+    #             input_ids=input["target"],
+    #             attention_mask=input["target"].ne(self.pad_token_id)
+    #         )
+    #     )
         
     def forward(self, input):
         """        
