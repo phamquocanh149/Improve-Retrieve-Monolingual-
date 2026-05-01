@@ -150,26 +150,26 @@ class BiEncoder(pl.LightningModule):
     #     )
         
     def forward(self, input):
-        """        
-        Parameters
-        ----------
-        input: dict
-        """
-        # --- THÊM ĐOẠN NÀY ĐỂ ĐỒNG BỘ 4 ID ĐẶC BIỆT ---
-        if "labse" in self.model_name_or_path.lower():
-            for key in ["src", "tgt"]:
-                # Map <s> (0) -> [CLS] (101)
-                input[key]["input_ids"][input[key]["input_ids"] == 0] = 101
-                # Map </s> (2) -> [SEP] (102)
-                input[key]["input_ids"][input[key]["input_ids"] == 2] = 102
-                # Map <pad> (1) -> [PAD] (0)
-                input[key]["input_ids"][input[key]["input_ids"] == 1] = 0
-                # Map <unk> (3) -> [UNK] (100) của LaBSE
-                input[key]["input_ids"][input[key]["input_ids"] == 3] = 100
+        # """        
+        # Parameters
+        # ----------
+        # input: dict
+        # """
+        # # --- THÊM ĐOẠN NÀY ĐỂ ĐỒNG BỘ 4 ID ĐẶC BIỆT ---
+        # if "labse" in self.model_name_or_path.lower():
+        #     for key in ["src", "tgt"]:
+        #         # Map <s> (0) -> [CLS] (101)
+        #         input[key]["input_ids"][input[key]["input_ids"] == 0] = 101
+        #         # Map </s> (2) -> [SEP] (102)
+        #         input[key]["input_ids"][input[key]["input_ids"] == 2] = 102
+        #         # Map <pad> (1) -> [PAD] (0)
+        #         input[key]["input_ids"][input[key]["input_ids"] == 1] = 0
+        #         # Map <unk> (3) -> [UNK] (100) của LaBSE
+        #         input[key]["input_ids"][input[key]["input_ids"] == 3] = 100
                 
-                # Cập nhật lại attention_mask vì ID pad của LaBSE giờ là 0
-                input[key]["attention_mask"] = input[key]["input_ids"].ne(0)
-        # ---------------------------------------------
+        #         # Cập nhật lại attention_mask vì ID pad của LaBSE giờ là 0
+        #         input[key]["attention_mask"] = input[key]["input_ids"].ne(0)
+        # # ---------------------------------------------
         
 
         # embed questions and contexts
@@ -234,8 +234,8 @@ class BiEncoder(pl.LightningModule):
         """
         if self.second_stage:
             levs = inputs["levs"]
-        if "net_input" in inputs:
-            inputs = self.make_input_from_fairseq(inputs)
+        # if "net_input" in inputs:
+        #     inputs = self.make_input_from_fairseq(inputs)
         outputs = self(inputs)
         
         ##### FOR MULTIPROCESSING sync
