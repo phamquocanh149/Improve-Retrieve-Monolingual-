@@ -11,8 +11,8 @@ from khmernltk import word_tokenize
 # ==========================================
 # CẤU HÌNH ĐƯỜNG DẪN 
 # ==========================================
-DIR_RAW = "/kaggle/working/Improve-Retrieve-Monolingual--qap_fix_khmer/raw"
-DIR_OUT = "/kaggle/working/Improve-Retrieve-Monolingual--qap_fix_khmer/retrieval"
+DIR_RAW = "/kaggle/working/Improve-Retrieve-Monolingual--qap_fix_khmer_v2/raw"
+DIR_OUT = "/kaggle/working/Improve-Retrieve-Monolingual--qap_fix_khmer_v2/retrieval"
 K_RETRIEVE = 5
 BATCH_SIZE = 512
 
@@ -46,7 +46,7 @@ def process_split(split_name, model, tokenizer):
         embeds = []
         for i in tqdm(range(0, len(texts), BATCH_SIZE), desc="Mã hóa LaBSE"):
             batch = texts[i:i+BATCH_SIZE]
-            inputs = tokenizer(batch, padding=True, truncation=True, max_length=128, return_tensors="pt").to("cuda")
+            inputs = tokenizer(batch, padding=True, truncation=True, max_length=256, return_tensors="pt").to("cuda")
             with torch.no_grad():
                 outputs = model(**inputs)
                 emb = torch.nn.functional.normalize(outputs.last_hidden_state[:, 0, :], p=2, dim=1)
@@ -86,6 +86,14 @@ def process_split(split_name, model, tokenizer):
             retrieved_tokens = tokenized_km_corpus[retrieved_idx]
             lev_matrix[i, j] = calc_lev_score(true_tokens, retrieved_tokens)
 
+    # ================================================================
+    # TÍNH TOÁN VÀ IN RA ĐIỂM LEVENSHTEIN TRUNG BÌNH
+    # ================================================================
+    avg_lev = np.mean(lev_matrix)
+    print(f"\n📊 ĐIỂM LEVENSHTEIN TRUNG BÌNH ({split_name.upper()}): {avg_lev:.4f}")
+    print(f"   (Điểm càng gần 1.0 nghĩa là FAISS tìm được câu càng sát nghĩa)")
+    # ================================================================
+
     path_indices = os.path.join(DIR_OUT, f"indices-cat-{split_name}-full-k={K_RETRIEVE}.npy")
     path_lev = os.path.join(DIR_OUT, f"lev-cat-{split_name}-full-k={K_RETRIEVE}.npy")
     
@@ -97,11 +105,20 @@ if __name__ == "__main__":
     import warnings
     warnings.filterwarnings("ignore")
     
-    print("Khởi tạo mô hình LaBSE...")
-    tokenizer = AutoTokenizer.from_pretrained('/kaggle/input/datasets/pqanhhl149/sentence-transformerslabse/LaBSE')
-    model = AutoModel.from_pretrained('/kaggle/input/datasets/pqanhhl149/sentence-transformerslabse/LaBSE').to("cuda")
+    print("Khởi tạo mô hình LaBSE STAGE 1...")
+    
+    # 🔴 ĐÃ SỬA ĐƯỜNG DẪN THÀNH MÔ HÌNH VỪA BÓC VỎ 🔴
+    STAGE_1_MODEL_PATH = '/kaggle/working/labse_stage1_hf'
+    
+    tokenizer = AutoTokenizer.from_pretrained(STAGE_1_MODEL_PATH)
+    model = AutoModel.from_pretrained(STAGE_1_MODEL_PATH).to("cuda")
+    
+    # ================================================================
+    # BẬT CHẾ ĐỘ EVAL ĐỂ TẮT DROPOUT, ỔN ĐỊNH HÓA VECTOR
+    # ================================================================
+    model.eval()
     
     process_split("train", model, tokenizer)
     process_split("valid", model, tokenizer)
     
-    print("\n🎉🎉🎉 TOÀN BỘ QUÁ TRÌNH TIỀN TÍNH TOÁN ĐÃ THÀNH CÔNG! SẴN SÀNG HUẤN LUYỆN!")
+    print("\n🎉🎉🎉 TOÀN BỘ QUÁ TRÌNH TIỀN TÍNH TOÁN ĐÃ THÀNH CÔNG! SẴN SÀNG HUẤN LUYỆN STAGE 2!")
